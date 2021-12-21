@@ -58,26 +58,15 @@ rho_s=2650 # kg/m^3
 w_dir=os.getcwd()
 file_name = 'output_Preparazione_solida_q10rgm1.txt'
 file = os.path.join(w_dir, 'raw_solid', file_name)
-# path_in = os.path.join(w_dir, 'input_files')
 path_out = os.path.join(w_dir, 'output_files')
 run = 'q10rgm1'
 # Set directory
-# if os.path.exists(path_in):
-#     pass
-# else:
-#     os.mkdir(path_in)
-    
 if os.path.exists(path_out):
     pass
 else:
     os.mkdir(path_out)
 
-# # List file in input images directory
-# filenames = os.listdir(path_in)
-
-
 # Read input file:
-
 df = pd.read_csv(file
                  ,sep="\t", skiprows=4
                   ,names=['time', 'Weight_kg', 'dis_lpers']
