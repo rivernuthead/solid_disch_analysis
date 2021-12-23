@@ -147,22 +147,6 @@ np.savetxt(os.path.join(path_out, 'd_w_outliers_removal.txt'), d_w, fmt='%.3f', 
 # Perform moving average calculation
 d_w=moving_avg(d_w, 6)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     
 fig, axes = plt.subplots(2,1)
 axes[0].plot(t[0:len(d_w)], d_w)
@@ -185,12 +169,6 @@ ax1.set_title('Weight '+ run)
 ax1.set_xlabel('Time [s]')
 ax1.set_ylabel('Weight [Kg]')
 plt.show()
-
-
-
-
-
-
 
 
 np.savetxt(os.path.join(path_out, 'weight.txt'), weight, fmt='%.3f', delimiter=',')
