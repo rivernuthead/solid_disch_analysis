@@ -11,11 +11,59 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# FUNCTIONS
+
+###############################################################################
+# Functions
+###############################################################################
+# Forward and backward mean
+def  ward_mean(data, parameter):
+    ward_data=[]
+    den = np.ones(len(data)-1)
+    for i in range(1, len(data)):
+        mean=np.sum(data[:i]/len(data[:i]))
+        np.append(ward_data, mean)                    
+    return ward_data
 
 # Moving averages:
 def moving_avg(x,n):
     return np.convolve(x, np.ones(n), 'valid')/n
+
+# Forward and backward mean
+def  ward_mean(data, parameter):
+    '''
+
+    Parameters
+    ----------
+    data : np.array
+        1D Data array (Ndim) where perform the forward or backward average
+    parameter : string
+        'f': forward average
+        'b': backward average
+    Returns
+    -------
+    averaged_data : np.array
+        1D veraged Data array (N-1 dim)
+
+    '''
+    averaged_data=[]
+    if parameter == 'f':
+        print('Performing forward average...')
+    elif parameter == 'b':
+        print('Performing backward average...')
+    else:
+        print('Parameter must be a string:  f or b for Forward or Backward mean')
+    # Loop all over data array
+    for i in range(2, len(data)+1):
+        if parameter == 'f':
+            mean=np.sum(data[:i])/i 
+        elif parameter == 'b':
+            mean=np.sum(data[len(data)-i:])/i
+        else:
+            print('parameter error!')
+            break
+        # Append data to outcomes array
+        averaged_data = np.append(averaged_data, mean)
+    return averaged_data
 
 # Remove outliers:
 def removeOutliers(x, outliers_cost):
@@ -54,6 +102,9 @@ def nan_helper(y):
 # PARAMETERS
 rho_w=1000 # kg/m^3
 rho_s=2650 # kg/m^3
+
+# Initialize Arrays
+qs = [] # Solid discharge array
 
 w_dir=os.getcwd()
 file_name = 'output_Preparazione_solida_q10rgm1.txt'
@@ -141,14 +192,36 @@ d_w[nans] = np.interp(x(nans), x(~nans), d_w[~nans])
 
 np.savetxt(os.path.join(path_out, 'd_w_outliers_removal.txt'), d_w, fmt='%.3f', delimiter=',')
 
-
-
-
 # Perform moving average calculation
-d_w=moving_avg(d_w, 6)
+dw_mov_vgd=moving_avg(d_w, 6)
 
-    
-fig, axes = plt.subplots(2,1)
+
+# Calculate qs [g/s] (dt 10s by default) kg/10s --> 1000g/10s --> 100g/s
+qs = dw_mov_vgd*100
+
+# Calculate forward and backward average
+qs_fwd = ward_mean(qs, 'f')
+qs_bwd = ward_mean(qs, 'b')
+
+
+
+
+
+###############################################################################
+# PLOTS
+###############################################################################
+
+# Plot of weight over time and linear trendline
+fig1, ax1 = plt.subplots()
+ax1.plot(t, weight)
+ax1.plot(t[int(len(t)/10):-int(len(t)/10)], m*t[int(len(t)/10):-int(len(t)/10)]+q)
+ax1.set_title('Weight '+ run)
+ax1.set_xlabel('Time [s]')
+ax1.set_ylabel('Weight [Kg]')
+plt.show()
+
+  
+fig2, axes = plt.subplots(2,1)
 axes[0].plot(t[0:len(d_w)], d_w)
 axes[0].set_title('raw signal '+ run)
 axes[0].set_xlabel('Time [s]')
@@ -161,15 +234,6 @@ sns.boxplot(data=d_w)
 
 # TODO
 #Plots with sublots with weight and delta weight 
-
-fig1, ax1 = plt.subplots()
-ax1.plot(t, weight)
-ax1.plot(t[int(len(t)/10):-int(len(t)/10)], m*t[int(len(t)/10):-int(len(t)/10)]+q)
-ax1.set_title('Weight '+ run)
-ax1.set_xlabel('Time [s]')
-ax1.set_ylabel('Weight [Kg]')
-plt.show()
-
 
 np.savetxt(os.path.join(path_out, 'weight.txt'), weight, fmt='%.3f', delimiter=',')
 np.savetxt(os.path.join(path_out, 'd_w_moving_avg.txt'), d_w, fmt='%.3f', delimiter=',')
